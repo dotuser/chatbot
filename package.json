@@ -1,0 +1,30 @@
+{
+  "name": "bot-server",
+  "version": "1.0.0",
+  "description": "Restaurant Chat Bot for FAQ's",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotuser/chatbot.git"
+  },
+  "keywords": [
+    "ChatBot",
+    "Social Media",
+    "Node",
+    "API"
+  ],
+  "author": "dotuser",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dotuser/chatbot/issues"
+  },
+  "homepage": "https://github.com/dotuser/chatbot#readme",
+  "dependencies": {
+    "express": "^4.19.2",
+    "nodemon": "^3.1.4"
+  }
+}
