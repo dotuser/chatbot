@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 app.post('/webhook', (req, res) => {
   const { hubMode, hubVerifyToken, hubChallenge } = req.query;
 
-  if (hubMode === 'subscribe' && hubVerifyToken === 'hi') {
+  if (hubMode === 'subscribe' && hubVerifyToken === 123456789) {
     res.send(hubChallenge);
   } else {
     res.status(400).send('Invalid request');
