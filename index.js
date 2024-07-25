@@ -4,7 +4,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT;
 
-// const messengerToken = process.env.MESSENGER_TOKEN
+// const messengerToken = process.env.MESSENGER_TOKEN 
 
 app.get('/', (req, res) => {
     res.send('Hello World');
