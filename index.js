@@ -7,11 +7,11 @@ const PORT = process.env.PORT;
 
 
 app.get('/', (req, res) => {
-    res.send('Not WORKING!!!');
+    res.send('Home');
 });
 
 app.get('/webhook', (req, res) => {
-  res.send("I'm working!!!")
+  res.send('Messenger Hook')
   // const mode = req.query["hub.mode"];
   // const token = req.query["hub.verify_token"];
   // const challenge = req.query["hub.challenge"];
