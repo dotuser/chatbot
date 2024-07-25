@@ -11,21 +11,20 @@ app.get('/', (req, res) => {
 });
 
 app.get('/webhook', (req, res) => {
-  res.send('Messenger Hook')
-  // const mode = req.query["hub.mode"];
-  // const token = req.query["hub.verify_token"];
-  // const challenge = req.query["hub.challenge"];
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
 
-  // if (mode && token) {
-  //   if (mode === "subscribe" && token === process.env.MESSENGER_TOKEN) {
-  //     console.log("WEBHOOK VERIFIED");
-  //     res
-  //     .status(200)
-  //     .send(challenge);
-  //   } else {
-  //     res.sendStatus(403);
-  //   }
-  // }
+  if (mode && token) {
+    if (mode === "subscribe" && token === process.env.MESSENGER_TOKEN) {
+      console.log("WEBHOOK VERIFIED");
+      res
+      .status(200)
+      .send(challenge);
+    } else {
+      res.sendStatus(403);
+    }
+  }
 });
 
 app.post('/webhook', (req, res) => {
