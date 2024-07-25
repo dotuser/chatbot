@@ -5,30 +5,28 @@ const app = express();
 const PORT = process.env.PORT;
 
 app.get('/', (req, res) => {
-    res.send('Hello World');
+    res.send('Not WORKING!!!');
 });
 
 app.get("/messaging-webhook", (req, res) => {
-  res.send('Madarchod');
-  // const mode = req.query["hub.mode"];
-  // const token = req.query["hub.verify_token"];
-  // const challenge = req.query["hub.challenge"];
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
 
-  // if (mode && token) {
-  //   if (mode === "subscribe" && token === process.env.MESSENGER_TOKEN) {
-  //     console.log("WEBHOOK_VERIFIED");
-  //     res.status(200).send(challenge);
-  //   } else {
-  //     res.sendStatus(403);
-  //   }
-  // }
+  if (mode && token) {
+    if (mode === "subscribe" && token === process.env.MESSENGER_TOKEN) {
+      console.log("WEBHOOK_VERIFIED");
+      res.status(200).send(challenge);
+    } else {
+      res.sendStatus(403);
+    }
+  }
 });
 
 app.post("/messaging-webhook", (req, res) => {
-  res.send('Chootiye');
-  // const payload = req.body;
+  const payload = req.body;
   // Handle the payload (e.g., parse and process the changed fields)
-  // res.status(200).send("OK");
+  res.status(200).send("OK");
 });
 
 // app.get("/webhook", (req, res) => {
