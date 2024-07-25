@@ -4,7 +4,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT;
 
-const messengerToken = process.env.MESSENGER_TOKEN
+// const messengerToken = process.env.MESSENGER_TOKEN 
 
 app.get('/', (req, res) => {
     res.send('Hello World');
@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 app.post('/webhook', (req, res) => {
   const { hubMode, hubVerifyToken, hubChallenge } = req.query;
 
-  if (hubMode === 'subscribe' && hubVerifyToken === messengerToken) {
+  if (hubMode === 'subscribe' && hubVerifyToken === 'hi') {
     res.send(hubChallenge);
   } else {
     res.status(400).send('Invalid request');
