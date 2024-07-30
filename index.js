@@ -1,6 +1,5 @@
 const express = require('express');
 const request = require('request');
-// const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
@@ -31,13 +30,6 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// app.post('/webhook', (req, res) => {
-//   const payload = req.body;
-//   // Handle the payload (e.g., parse and process the changed fields)
-//   res.status(200).send("OK");
-// });
-
-
 app.post('/webhook', (req, res) => {
   const payload = req.body;
 
@@ -56,17 +48,10 @@ app.post('/webhook', (req, res) => {
 
       if (webhook_event.message) {
         handleMessage(sender_psid, webhook_event.message);
-      } 
+        res.status(200).send('OK');
+      }
 
-
-      // entry.messaging.forEach((entry) => {
-      //   if (entry.message) {
-      //     // Handle incoming message
-      //     console.log('Received message:', messaging.message);
-      //     // Send a response back to the user
-      //     sendResponse(messaging.sender.id, 'Hello from my app!');
-      //   }
-      // });
+      res.status(200).send('OK');
 
     });
   } else {
@@ -85,7 +70,7 @@ const handleMessage = (sender_psid, received_message) => {
 
     // Create the payload for a basic text message
     response = {
-      "text": `You sent the message: "${received_message.text}". Now send me an image!`
+      "text": `You sent the message: "${received_message.text}".`
     }
   }  
   
@@ -119,35 +104,6 @@ const callSendAPI = (sender_psid, response) => {
     }
   }); 
 }
-
-// Add this function to send a response
-// const handleMessage = (recipientId, message) => {
-//   console.log('Send Messenger API Res func.. called!');
-
-//   let response;
-
-//   // Check if the message contains text
-//   if (message.text) {    
-
-//     // Create the payload for a basic text message
-//     response = {
-//       "text": "Server's LIVE..."
-//     }
-//   }  
-  
-//   // Sends the response message
-//   callSendAPI(recipientId, message);    
-
-//   // axios.post('https://graph.facebook.com/v14.0/me/messages', {
-//   //   recipient: { id: recipientId },
-//   //   message: { text: message },
-//   // }, {
-//   //   headers: {
-//   //     'Authorization': `Bearer ${process.env.MESSENGER_ACCESS_TOKEN}`,
-//   //     'Content-Type': 'application/json',
-//   //   },
-//   // });
-// }
 
 app.listen(PORT, () => {
     console.log(`Server listening on port: ${PORT}`);
