@@ -55,8 +55,7 @@ app.post('/webhook', (req, res) => {
       console.log('Sender PSID: ' + sender_psid);
 
       if (webhook_event.message) {
-        // handleMessage(sender_psid, webhook_event.message);        
-        res.status(200).send('EVENT_RECEIVED');
+        handleMessage(sender_psid, webhook_event.message);
       } 
 
 
@@ -75,36 +74,29 @@ app.post('/webhook', (req, res) => {
   }
 });
 
-// Add this function to send a response
-function sendResponse(recipientId, message) {
-  console.log('Send Messenger API Res func.. called!');
+const handleMessage = (sender_psid, received_message) => {
 
   let response;
 
+  console.log('Stage 1 ....');
+
   // Check if the message contains text
-  if (message.text) {    
+  if (received_message.text) {    
 
     // Create the payload for a basic text message
     response = {
-      "text": "Server's LIVE..."
+      "text": `You sent the message: "${received_message.text}". Now send me an image!`
     }
   }  
   
   // Sends the response message
-  callSendAPI(recipientId, message);    
-
-  // axios.post('https://graph.facebook.com/v14.0/me/messages', {
-  //   recipient: { id: recipientId },
-  //   message: { text: message },
-  // }, {
-  //   headers: {
-  //     'Authorization': `Bearer ${process.env.MESSENGER_ACCESS_TOKEN}`,
-  //     'Content-Type': 'application/json',
-  //   },
-  // });
+  callSendAPI(sender_psid, response);    
 }
 
-function callSendAPI(sender_psid, response) {
+const callSendAPI = (sender_psid, response) => {
+
+  console.log('Stage 2 ....');
+
   // Construct the message body
   let request_body = {
     "recipient": {
@@ -127,6 +119,35 @@ function callSendAPI(sender_psid, response) {
     }
   }); 
 }
+
+// Add this function to send a response
+// const handleMessage = (recipientId, message) => {
+//   console.log('Send Messenger API Res func.. called!');
+
+//   let response;
+
+//   // Check if the message contains text
+//   if (message.text) {    
+
+//     // Create the payload for a basic text message
+//     response = {
+//       "text": "Server's LIVE..."
+//     }
+//   }  
+  
+//   // Sends the response message
+//   callSendAPI(recipientId, message);    
+
+//   // axios.post('https://graph.facebook.com/v14.0/me/messages', {
+//   //   recipient: { id: recipientId },
+//   //   message: { text: message },
+//   // }, {
+//   //   headers: {
+//   //     'Authorization': `Bearer ${process.env.MESSENGER_ACCESS_TOKEN}`,
+//   //     'Content-Type': 'application/json',
+//   //   },
+//   // });
+// }
 
 app.listen(PORT, () => {
     console.log(`Server listening on port: ${PORT}`);
