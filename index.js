@@ -63,7 +63,7 @@ function sendResponse(recipientId, message) {
     message: { text: message },
   }, {
     headers: {
-      'Authorization': `Bearer ${MESSENGER_ACCESS_TOKEN}`,
+      'Authorization': `Bearer ${process.env.MESSENGER_ACCESS_TOKEN}`,
       'Content-Type': 'application/json',
     },
   });
