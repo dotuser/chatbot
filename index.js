@@ -43,18 +43,30 @@ app.post('/webhook', (req, res) => {
 
   if (payload.object === 'page' && payload.entry) {
     payload.entry.forEach((entry) => {
-      entry.messaging.forEach((messaging) => {
-        if (messaging.message) {
-          // Handle incoming message
-          console.log('Received message:', messaging.message);
-          // Send a response back to the user
-          sendResponse(messaging.sender.id, 'Hello from my app!');
-        }
-      });
-    });
-  }
 
-  res.status(200).send("OK");
+      let webhook_event = entry.messaging[0];
+      console.log(webhook_event);
+
+
+      // Get the sender PSID
+      let sender_psid = webhook_event.sender.id;
+      console.log('Sender PSID: ' + sender_psid);
+
+      res.status(200).send('EVENT_RECEIVED');
+
+      // entry.messaging.forEach((entry) => {
+      //   if (entry.message) {
+      //     // Handle incoming message
+      //     console.log('Received message:', messaging.message);
+      //     // Send a response back to the user
+      //     sendResponse(messaging.sender.id, 'Hello from my app!');
+      //   }
+      // });
+
+    });
+  } else {
+      res.status(404).send('Not Found');
+  }
 });
 
 // Add this function to send a response
