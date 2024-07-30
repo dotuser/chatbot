@@ -55,10 +55,10 @@ app.post('/webhook', (req, res) => {
       console.log('Sender PSID: ' + sender_psid);
 
       if (webhook_event.message) {
-        handleMessage(sender_psid, webhook_event.message);        
+        // handleMessage(sender_psid, webhook_event.message);        
+        res.status(200).send('EVENT_RECEIVED');
       } 
 
-      res.status(200).send('EVENT_RECEIVED');
 
       // entry.messaging.forEach((entry) => {
       //   if (entry.message) {
