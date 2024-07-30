@@ -6,7 +6,8 @@ app.use(express.json());
 const PORT = process.env.PORT;
 
 app.get('/', (req, res) => {
-    res.send('Home');
+  console.log('Server Running');
+  res.send('Home');
 });
 
 app.get('/webhook', (req, res) => {
