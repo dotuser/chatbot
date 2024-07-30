@@ -5,7 +5,6 @@ const app = express();
 app.use(express.json()); 
 const PORT = process.env.PORT;
 
-
 app.get('/', (req, res) => {
     res.send('Home');
 });
@@ -22,16 +21,51 @@ app.get('/webhook', (req, res) => {
       .status(200)
       .send(challenge);
     } else {
-      res.sendStatus(403);
+      res
+      .status(403)
+      .send('Forbidden');
     }
   }
 });
 
+// app.post('/webhook', (req, res) => {
+//   const payload = req.body;
+//   // Handle the payload (e.g., parse and process the changed fields)
+//   res.status(200).send("OK");
+// });
+
+
 app.post('/webhook', (req, res) => {
   const payload = req.body;
-  // Handle the payload (e.g., parse and process the changed fields)
+
+  if (payload.object === 'page' && payload.entry) {
+    payload.entry.forEach((entry) => {
+      entry.messaging.forEach((messaging) => {
+        if (messaging.message) {
+          // Handle incoming message
+          console.log('Received message:', messaging.message);
+          // Send a response back to the user
+          sendResponse(messaging.sender.id, 'Hello from my app!');
+        }
+      });
+    });
+  }
+
   res.status(200).send("OK");
 });
+
+// Add this function to send a response
+function sendResponse(recipientId, message) {
+  axios.post('https://graph.facebook.com/v14.0/me/messages', {
+    recipient: { id: recipientId },
+    message: { text: message },
+  }, {
+    headers: {
+      'Authorization': `Bearer ${MESSENGER_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+  });
+}
 
 app.listen(PORT, () => {
     console.log(`Server listening on port: ${PORT}`);
