@@ -58,6 +58,7 @@ app.post('/webhook', (req, res) => {
 
 // Add this function to send a response
 function sendResponse(recipientId, message) {
+  console.log('Send Messenger API Res func.. called!');
   axios.post('https://graph.facebook.com/v14.0/me/messages', {
     recipient: { id: recipientId },
     message: { text: message },
