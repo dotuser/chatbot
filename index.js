@@ -23,6 +23,8 @@ app.get('/webhook', (req, res) => {
 app.post('/webhook', (req, res) => {
   const payload = req.body;
 
+  //  FOR INSTA  |  if (body.object === 'instagram') {
+
   if (payload.object === 'page' && payload.entry) {
     payload.entry.forEach((entry) => {
       let webhook_event = entry.messaging[0];
@@ -57,13 +59,30 @@ const callSendAPI = async (sender_psid, response) => {
 
   try {
     await axios.post('https://graph.facebook.com/v2.6/me/messages', request_body, {
-      params: { "access_token": process.env.FB_PAGE_ACCESS_TOKEN }
+      params: { "access_token": process.env.INSTA_PAGE_ACCESS_TOKEN }
     });
     console.log('message sent!');
   } catch (err) {
     console.error("Unable to send message:" + err);
   }
 };
+
+// function sendMessage(recipientId, messageText) {
+//   axios.post(`https://graph.facebook.com/v15.0/${recipientId}/messages`, {
+//       messaging_type: 'RESPONSE',
+//       recipient: { id: recipientId },
+//       message: { text: messageText },
+//   }, {
+//       params: { access_token: process.env.ACCESS_TOKEN },
+//   })
+//   .then(response => {
+//       console.log('Message sent:', response.data);
+//   })
+//   .catch(error => {
+//       console.error('Error sending message:', error);
+//   });
+// }
+
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
