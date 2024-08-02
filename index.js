@@ -50,6 +50,7 @@ const handleMessage = (sender_psid, received_message) => {
 };
 
 const callSendAPI = async (sender_psid, response) => {
+  console.log(response.text);
   const request_body = {
     "recipient": {
       "id": sender_psid
