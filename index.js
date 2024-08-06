@@ -20,27 +20,21 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-app.post('/webhook', (req, res) => {
+
+app.post('/webhook', async (req, res) => {
   const payload = req.body;
 
-  // console.log(payload);
-  //  FOR INSTA  |  if (body.object === 'instagram') {
-
   if (payload.object === 'page' && payload.entry) {
-    payload.entry.forEach(async (entry) => {
+    const promises = payload.entry.map(async (entry) => {
       const event = entry.messaging[0];
-      
-      const psid = event.sender.id;
-      const pgid = event.recipient.id;
-      const msg = event.message.text;
 
-
-      //  FACEBOOK PAGE
-      if (event.message.text) {
-        // callSendAPI(pgid, psid, msg);
+      if (event.message && event.message.text) {
+        const psid = event.sender.id;
+        const pgid = event.recipient.id;
+        const msg = event.message.text;
 
         const url = `https://graph.facebook.com/v20.0/${pgid}/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
-            
+
         const payload = {
           recipient: {
             id: psid,
@@ -50,26 +44,71 @@ app.post('/webhook', (req, res) => {
             text: `Server received your message: ${msg}`,
           },
         };
-        
-        // try {
-        //   await axios.post(url, payload)
-        //   .then(res => {
-        //     console.log(`Success: ${res.data}`);
-        //     res.status(200).send('OK');
-        //   }).catch(e => {
-        //     console.log(`Success: ${res.data}`);
-        //     res.status(400);
-        //   })
-        // } catch (error) {
-        //   console.log(error);
-        // }
+
+        try {
+          const response = await axios.post(url, payload, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          console.log(`Success: ${response.data}`);
+        } catch (error) {
+          console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
+        }
       }
     });
-    // return res.status(200).send('OK');
-  } // else {
-  //   return res.status(404).send('Not Found');
-  // }
+
+    await Promise.all(promises);
+    res.status(200).send('OK');
+  } else {
+    res.status(400).send('Bad Request');
+  }
 });
+
+// app.post('/webhook', async (req, res) => {
+//   const payload = req.body;
+//   let psid = null;
+//   let pgid = null;
+//   let msg = null;
+
+//   if (payload.object === 'page' && payload.entry) {
+//     payload.entry.forEach(entry => {
+//       const event = entry.messaging[0];
+      
+//       psid = event.sender.id;
+//       pgid = event.recipient.id;
+//       msg = event.message.text;
+//     });
+
+//     //  FACEBOOK PAGE
+//     if (psid && pgid && msg) {
+//       const url = `https://graph.facebook.com/v20.0/${pgid}/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
+          
+//       const payload = {
+//         recipient: {
+//           id: psid,
+//         },
+//         messaging_type: 'RESPONSE',
+//         message: {
+//           text: `Server received your message: ${msg}`,
+//         },
+//       };
+      
+//       try {
+//         await axios.post(url, payload)
+//         .then(res => {
+//           console.log(`Success: ${res.data}`);
+//           res.status(200).send('OK');
+//         }).catch(e => {
+//           console.log(`Success: ${res.data}`);
+//           res.status(400);
+//         })
+//       } catch (error) {
+//         console.log(error);
+//       }
+//     }
+//   }
+// });
 
 // const callSendAPI = async (pgid, psid, msg) => {
 //   const url = `https://graph.facebook.com/v20.0/${pgid}/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
