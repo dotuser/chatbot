@@ -51,18 +51,18 @@ app.post('/webhook', (req, res) => {
           },
         };
         
-        try {
-          await axios.post(url, payload)
-          .then(res => {
-            console.log(`Success: ${res.data}`);
-            res.status(200).send('OK');
-          }).catch(e => {
-            console.log(`Success: ${res.data}`);
-            res.status(400);
-          })
-        } catch (error) {
-          console.log(error);
-        }
+        // try {
+        //   await axios.post(url, payload)
+        //   .then(res => {
+        //     console.log(`Success: ${res.data}`);
+        //     res.status(200).send('OK');
+        //   }).catch(e => {
+        //     console.log(`Success: ${res.data}`);
+        //     res.status(400);
+        //   })
+        // } catch (error) {
+        //   console.log(error);
+        // }
       }
     });
     // return res.status(200).send('OK');
