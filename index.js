@@ -23,23 +23,26 @@ app.get('/webhook', (req, res) => {
 app.post('/webhook', (req, res) => {
   const payload = req.body;
 
-  //  FOR INSTA  |  if (body.object === 'instagram') {
-  if (payload.object === 'page' && payload.entry) {
-    payload.entry.forEach((entry) => {
-      let webhook_event = entry.messaging[0];
-      let sender_psid = webhook_event.sender.id;
+  console.log(payload);
+  return res.status(200).send('OK');
 
-      console.log(`ID: ${sender_psid}`);
+  //  FOR INSTA  |  if (body.object === 'instagram') {
+  // if (payload.object === 'page' && payload.entry) {
+  //   payload.entry.forEach((entry) => {
+  //     let webhook_event = entry.messaging[0];
+  //     let sender_psid = webhook_event.sender.id;
+
+  //     console.log(`ID: ${sender_psid}`);
       
-      if (webhook_event.message) {
-        console.log(`Message: ${webhook_event.message.text}`);
-        // handleMessage(sender_psid, webhook_event.message);
-      }
-    });
-    return res.status(200).send('OK');
-  } else {
-    return res.status(404).send('Not Found');
-  }
+  //     if (webhook_event.message) {
+  //       console.log(`Message: ${webhook_event.message.text}`);
+  //       // handleMessage(sender_psid, webhook_event.message);
+  //     }
+  //   });
+  //   return res.status(200).send('OK');
+  // } else {
+  //   return res.status(404).send('Not Found');
+  // }
 });
 
 // const handleMessage = (sender_psid, received_message) => {
