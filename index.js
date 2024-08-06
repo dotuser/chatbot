@@ -46,33 +46,28 @@ app.post('/webhook', (req, res) => {
 });
 
 const callSendAPI = async (pgid, psid, msg) => {
-  console.log(msg);
+  const url = `https://graph.facebook.com/v20.0/${pgid}/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
 
-  if (msg.text) {
-    const url = `https://graph.facebook.com/v20.0/${pgid}/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
-  
-    const payload = {
-      recipient: {
-        id: psid,
-      },
-      messaging_type: 'RESPONSE',
-      message: {
-        text: `Server received your message: ${msg}`,
-      },
-    };
-
-    await axios.post(url, payload, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  const payload = {
+    recipient: {
+      id: psid,
+    },
+    messaging_type: 'RESPONSE',
+    message: {
+      text: `Server received your message: ${msg}`,
+    },
+  };
+  await axios.post(url, payload, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then(response => {
+      console.log('Message sent:', response.data);
     })
-      .then(response => {
-        console.log('Message sent:', response.data);
-      })
-      .catch(error => {
-        console.error('Error sending message:', error.response ? error.response.data : error.message);
-      });
-  }
+    .catch(error => {
+      console.error('Error sending message:', error.response ? error.response.data : error.message);
+    });
 };
 
 // const request_body = {
