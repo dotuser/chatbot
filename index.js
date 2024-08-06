@@ -57,18 +57,26 @@ const callSendAPI = async (pgid, psid, msg) => {
       text: `Server received your message: ${msg}`,
     },
   };
-  await axios.post(url, payload, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then(response => {
-      console.log('Message sent:', response.data);
-    })
-    .catch(error => {
-      console.error('Error sending message:', error.response ? error.response.data : error.message);
-    });
+
+  try {
+    await axios.post(url, payload);
+    console.log('Message Sent');
+  } catch (error) {
+    console.log(error);
+  }
 };
+
+// await axios.post(url, payload, {
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// })
+//   .then(response => {
+//     console.log('Message sent:', response.data);
+//   })
+//   .catch(error => {
+//     console.error('Error sending message:', error.response ? error.response.data : error.message);
+//   });
 
 // const request_body = {
 //   "recipient": {
