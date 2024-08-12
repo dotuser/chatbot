@@ -5,7 +5,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-const { PORT, VERIFY_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN, WAPP_ACCESS_TOKEN, WAPP_PHONE_NUMBER_ID } = process.env;
+const { PORT, VERIFY_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN, WAPP_ACCESS_TOKEN } = process.env;
 
 app.get('/', (req, res) => res.send('Welcome to Chika Chino'));
 
@@ -76,14 +76,14 @@ app.post("/wapp-webhook", async (req, res) => {
     return res.sendStatus(400);
   }
 
-  // const business_phone_number_id = 
-  //   payload.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
+  const business_phone_number_id = 
+    payload.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
   
   try {
     // Send a message
     await axios({
       method: "POST",
-      url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${WAPP_PHONE_NUMBER_ID}/messages`,
+      url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
       headers: {
         Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
       },
@@ -100,7 +100,7 @@ app.post("/wapp-webhook", async (req, res) => {
     // Mark the incoming message as read
     await axios({
       method: "POST",
-      url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${WAPP_PHONE_NUMBER_ID}/messages`,
+      url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
       headers: {
         Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
       },
