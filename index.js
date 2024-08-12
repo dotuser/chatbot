@@ -70,36 +70,43 @@ app.get('/wapp-webhook', (req, res) => {
 app.post("/wapp-webhook", async (req, res) => {
   const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
-  const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${WAPP_PHONE_NUMBER_ID}/messages?access_token=${WAPP_ACCESS_TOKEN}`;
-  const payload = {
-    messaging_product: "whatsapp",
-    to: message.from,
-    text: { body: "Echo: " + message.text.body },
-    context: {
+  if (message && message.from && message.text?.body) {
+    const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${WAPP_PHONE_NUMBER_ID}/messages?access_token=${WAPP_ACCESS_TOKEN}`;
+
+    const payload = {
+      messaging_product: "whatsapp",
+      to: message.from,
+      text: { body: "Echo: " + message.text.body },
+      context: {
+        message_id: message.id,
+      },
+    };
+    
+    const msgSeenReq = {
+      messaging_product: "whatsapp",
+      status: "read",
       message_id: message.id,
-    },
-  };
-  const msgSeenReq = {
-    messaging_product: "whatsapp",
-    status: "read",
-    message_id: message.id,
-  };
-  try {
-    await axios.post(url, payload, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    await axios.post(url, msgSeenReq, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    console.log('Message Sent');
-    res.sendStatus(200);
-  } catch (error) {
-    console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
-    res.sendStatus(400);
+    };
+
+    try {
+      await axios.post(url, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      await axios.post(url, msgSeenReq, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Message Sent');
+      res.sendStatus(200);
+    } catch (error) {
+      console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
+      res.sendStatus(400);
+    }
   }
 });
 
