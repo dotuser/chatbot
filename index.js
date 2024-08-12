@@ -5,7 +5,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-const { PORT, VERIFY_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN } = process.env;
+const { PORT, VERIFY_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN, WAPP_ACCESS_TOKEN, WAPP_PHONE_NUMBER_ID } = process.env;
 
 app.get('/', (req, res) => res.send('Welcome to Chika Chino'));
 
@@ -79,8 +79,49 @@ app.post("/wapp-webhook", async (req, res) => {
   const business_phone_number_id = 
     payload.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
 
-  console.log(business_phone_number_id);
-  console.log(message.text.body);
+  if (business_phone_number_id == WAPP_PHONE_NUMBER_ID) {
+    console.log('ID Matched...');
+    
+  }
+  console.log(message.from);
+
+  // try {
+  //   // Send a message
+  //   await axios({
+  //     method: "POST",
+  //     url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${WAPP_PHONE_NUMBER_ID}/messages`,
+  //     headers: {
+  //       Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
+  //     },
+  //     data: {
+  //       messaging_product: "whatsapp",
+  //       to: message.from,
+  //       text: { body: "Echo: " + message.text.body },
+  //       context: {
+  //         message_id: message.id,
+  //       },
+  //     },
+  //   });
+    
+  //   // Mark the incoming message as read
+  //   await axios({
+  //     method: "POST",
+  //     url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${WAPP_PHONE_NUMBER_ID}/messages`,
+  //     headers: {
+  //       Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
+  //     },
+  //     data: {
+  //       messaging_product: "whatsapp",
+  //       status: "read",
+  //       message_id: message.id,
+  //     },
+  //   });
+
+  //   res.sendStatus(200);
+  // } catch (error) {
+  //   console.error("Error sending message:", error);
+  //   res.sendStatus(500);
+  // }
   
   res.sendStatus(200);
 });
