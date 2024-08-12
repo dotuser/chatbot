@@ -70,18 +70,16 @@ app.get('/wapp-webhook', (req, res) => {
 app.post("/wapp-webhook", async (req, res) => {
   const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
-  // Validate the message object and its type
   if (!message || message.type !== "text") {
     return res.sendStatus(400);
   }
 
-  // const business_phone_number_id = 
-  //   req.body.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
-  
   const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${WAPP_PHONE_NUMBER_ID}/messages?access_token=${WAPP_ACCESS_TOKEN}`;
   const payload = {
     messaging_product: "whatsapp",
     to: message.from,
+    status: "read",
+    // message_id: message.id,
     text: { body: "Echo: " + message.text.body },
     context: {
       message_id: message.id,
@@ -99,44 +97,6 @@ app.post("/wapp-webhook", async (req, res) => {
     console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
     res.sendStatus(400);
   }
-
-  // try {
-    
-    // await axios({
-    //   method: "POST",
-    //   url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
-    //   headers: {
-    //     Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
-    //   },
-    //   data: {
-    //     messaging_product: "whatsapp",
-    //     to: message.from,
-    //     text: { body: "Echo: " + message.text.body },
-    //     context: {
-    //       message_id: message.id,
-    //     },
-    //   },
-    // });
-    
-    // Mark the incoming message as read
-    // await axios({
-    //   method: "POST",
-    //   url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
-    //   headers: {
-    //     Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
-    //   },
-    //   data: {
-    //     messaging_product: "whatsapp",
-    //     status: "read",
-    //     message_id: message.id,
-    //   },
-    // });
-
-  //   res.sendStatus(200);
-  // } catch (error) {
-  //   console.error("Error sending message:", error);
-  //   res.sendStatus(500);
-  // }
 });
 
 app.listen(PORT, () => {
