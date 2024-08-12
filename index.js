@@ -28,7 +28,7 @@ app.post('/webhook', async (req, res) => {
   const senderId = messaging.sender.id;
   const pageId = messaging.recipient.id;
   const message = messaging.message.text;
-  
+
   const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${pageId}/messages?access_token=${PAGE_ACCESS_TOKEN}`;
   const payload = {
     recipient: {
@@ -46,7 +46,7 @@ app.post('/webhook', async (req, res) => {
         'Content-Type': 'application/json',
       },
     });
-    console.log('Message Sent..');
+    console.log('Message Sent');
   } catch (error) {
     console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
   }
@@ -54,24 +54,27 @@ app.post('/webhook', async (req, res) => {
   res.status(200).send('OK');
 });
 
-// const sendReply = (senderId, pageId, reply) => {
-//   const messageData = {
-//     recipient: {
-//       id: senderId
-//     },
-//     message: {
-//       text: reply
-//     }
-//   };
+app.get('/wapp-webhook', (req, res) => {
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+  console.log(req.query);
 
-//   axios.post(`https://graph.facebook.com/${GRAPH_API_VERSION}/${pageId}/messages?access_token=${PAGE_ACCESS_TOKEN}`, messageData)
-//     .then((response) => {
-//       console.log('Message sent successfully');
-//     })
-//     .catch((error) => {
-//       console.error('Failed to send message:', error);
-//     });
-// }
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    return res.status(200).send(challenge);
+  } else {
+    return res.status(403).send('Forbidden');
+  }
+});
+
+app.post("/wapp", async (req, res) => {
+  console.log(req.body);
+  const message = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+  console.log(message);
+  
+  res.sendStatus(200);
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
