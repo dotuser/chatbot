@@ -28,22 +28,26 @@ app.post("/webhook", (req, res) => {
   const entry = payload.entry;
   const type = payload.object;
 
-  if (!entry) 
+  if (!entry) {
     res.sendStatus(400);
+  };
 
-  if (type === 'page') 
+  if (type === 'page') {
     msgToPage(payload, res);
-  else if (type === 'whatsapp_business_account')
+  } else if (type === 'whatsapp_business_account') {
     msgToWapp(payload, res);
-  else res.sendStatus(400);
+  } else {
+    res.sendStatus(400);
+  } 
 });
 
 const msgToPage = async (payload, res) => {
   const promises = payload.entry.map(async (entry) => {
     const event = entry.messaging[0];
 
-    if (event.message && event.message.text)
+    if (event.message && event.message.text) {
       res.sendStatus(400);
+    };
 
     const psid = event.sender.id;
     const pgid = event.recipient.id;
@@ -78,8 +82,9 @@ const msgToPage = async (payload, res) => {
 const msgToWapp = async (payload, res) => {
   const message = payload.entry?.[0]?.changes[0]?.value?.messages?.[0];
 
-  if (!message?.type === "text")
+  if (!message?.type === "text") {
     res.sendStatus(400);
+  };
   
   const business_phone_number_id = 
     payload.entry?.[0].changes?.[0].value?.metadata?.phone_number_id;
@@ -116,52 +121,6 @@ const msgToWapp = async (payload, res) => {
 
   res.sendStatus(200);
 };
-
-// app.post('/webhook', async (req, res) => {
-//   const payload = req.body;
-//   console.log(payload);
-
-
-//   if (payload.object === 'page' && payload.entry) {
-//     const promises = payload.entry.map(async (entry) => {
-//       const event = entry.messaging[0];
-
-//       if (event.message && event.message.text) {
-//         const psid = event.sender.id;
-//         const pgid = event.recipient.id;
-//         const msg = event.message.text;
-
-//         const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${pgid}/messages?access_token=${PAGE_ACCESS_TOKEN}`;
-
-//         const payload = {
-//           recipient: {
-//             id: psid,
-//           },
-//           messaging_type: 'RESPONSE',
-//           message: {
-//             text: `Server received your message: ${msg}`,
-//           },
-//         };
-
-//         try {
-//           const response = await axios.post(url, payload, {
-//             headers: {
-//               'Content-Type': 'application/json',
-//             },
-//           });
-//           console.log(`Success: ${response.data}`);
-//         } catch (error) {
-//           console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
-//         }
-//       }
-//     });
-
-//     await Promise.all(promises);
-//     res.status(200).send('OK');
-//   } else {
-//     res.status(400).send('Bad Request');
-//   }
-// });
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
