@@ -63,8 +63,6 @@ app.post("/webhook", async (req, res) => {
   res.sendStatus(200);
 });
 
-
-
 app.get('/wapp', (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -80,47 +78,54 @@ app.get('/wapp', (req, res) => {
 });
 
 app.post("/wapp", async (req, res) => {
-  const payload = req.body
-  const message = payload.entry?.[0]?.changes[0]?.value?.messages?.[0];
+  const payload = req.body;
+  const message = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
-  if (!message?.type === "text") {
-    res.sendStatus(400);
-  };
-  
+  // Validate the message object and its type
+  if (!message || message.type !== "text") {
+    return res.sendStatus(400);
+  }
+
   const business_phone_number_id = 
-    payload.entry?.[0].changes?.[0].value?.metadata?.phone_number_id;
-  
-  await axios({
-    method: "POST",
-    url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
-    headers: {
-      Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
-    },
-    data: {
-      messaging_product: "whatsapp",
-      to: message.from,
-      text: { body: "Echo: " + message.text.body },
-      context: {
+    payload.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
+
+  try {
+    // Send a message
+    await axios({
+      method: "POST",
+      url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
+      headers: {
+        Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
+      },
+      data: {
+        messaging_product: "whatsapp",
+        to: message.from,
+        text: { body: "Echo: " + message.text.body },
+        context: {
+          message_id: message.id,
+        },
+      },
+    });
+    
+    // Mark the incoming message as read
+    await axios({
+      method: "POST",
+      url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
+      headers: {
+        Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
+      },
+      data: {
+        messaging_product: "whatsapp",
+        status: "read",
         message_id: message.id,
       },
-    },
-  });
-  
-  // mark incoming message as read
-  await axios({
-    method: "POST",
-    url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
-    headers: {
-      Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
-    },
-    data: {
-      messaging_product: "whatsapp",
-      status: "read",
-      message_id: message.id,
-    },
-  });
+    });
 
-  res.sendStatus(200);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.sendStatus(500);
+  }
 });
 
 app.listen(PORT, () => {
