@@ -68,12 +68,23 @@ app.get('/wapp-webhook', (req, res) => {
 });
 
 app.post("/wapp-webhook", async (req, res) => {
-  console.log(req.body);
-  const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
-  console.log(message);
+  const payload = req.body;
+  const message = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+
+  // Validate the message object and its type
+  if (!message || message.type !== "text") {
+    return res.sendStatus(400);
+  }
+
+  const business_phone_number_id = 
+    payload.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
+
+  console.log(business_phone_number_id);
+  console.log(message.text.body);
   
   res.sendStatus(200);
 });
+
 
 
 app.listen(PORT, () => {
