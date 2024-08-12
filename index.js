@@ -54,6 +54,28 @@ app.post('/webhook', async (req, res) => {
   res.status(200).send('OK');
 });
 
+app.get('/wapp-webhook', (req, res) => {
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+  console.log(req.query);
+
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    return res.status(200).send(challenge);
+  } else {
+    return res.status(403).send('Forbidden');
+  }
+});
+
+app.post("/wapp", async (req, res) => {
+  console.log(req.body);
+  const message = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+  console.log(message);
+  
+  res.sendStatus(200);
+});
+
+
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
 });
