@@ -78,15 +78,23 @@ app.post("/wapp-webhook", async (req, res) => {
   const payload = {
     messaging_product: "whatsapp",
     to: message.from,
-    status: "read",
-    // message_id: message.id,
     text: { body: "Echo: " + message.text.body },
     context: {
       message_id: message.id,
     },
   };
+  const msgSeenReq = {
+    messaging_product: "whatsapp",
+    status: "read",
+    message_id: message.id,
+  };
   try {
     await axios.post(url, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    await axios.post(url, msgSeenReq, {
       headers: {
         'Content-Type': 'application/json',
       },
