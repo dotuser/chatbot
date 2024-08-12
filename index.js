@@ -23,14 +23,16 @@ app.get('/webhook', (req, res) => {
 });
 
 app.post('/webhook', (req, res) => {
-  console.log(req.body.entry.length);
-  console.log(req.body.entry.messaging);
+  const messaging = req.body.entry[0].messaging[0];
+
+  const senderId = messaging.sender.id;
+  const pageId = messaging.recipient.id;
+  const messageText = messaging.message.text;
   
-  // const entry = req.body.entry[0];
-  // const messaging = entry.messaging[0];
-  // const senderId = messaging.sender.id;
-  // const pageId = messaging.recipient.id;
-  // const messageText = messaging.message.text;
+  console.log(senderId);
+  console.log(pageId);
+  console.log(messageText);
+  
 
   // // Check if the message is from the page
   // // if (messaging.recipient.id === 'YOUR_PAGE_ID')
