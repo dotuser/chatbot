@@ -5,7 +5,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-const { PORT, VERIFY_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN, WAPP_ACCESS_TOKEN } = process.env;
+const { PORT, VERIFY_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN, WAPP_ACCESS_TOKEN, WAPP_PHONE_NUMBER_ID } = process.env;
 
 app.get('/', (req, res) => res.send('Welcome to Chika Chino'));
 
@@ -68,54 +68,75 @@ app.get('/wapp-webhook', (req, res) => {
 });
 
 app.post("/wapp-webhook", async (req, res) => {
-  const payload = req.body;
-  const message = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+  const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
   // Validate the message object and its type
   if (!message || message.type !== "text") {
     return res.sendStatus(400);
   }
 
-  const business_phone_number_id = 
-    payload.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
+  // const business_phone_number_id = 
+  //   req.body.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
   
+  const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${WAPP_PHONE_NUMBER_ID}/messages?access_token=${WAPP_ACCESS_TOKEN}`;
+  const payload = {
+    messaging_product: "whatsapp",
+    to: message.from,
+    text: { body: "Echo: " + message.text.body },
+    context: {
+      message_id: message.id,
+    },
+  };
   try {
-    // Send a message
-    await axios({
-      method: "POST",
-      url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
+    await axios.post(url, payload, {
       headers: {
-        Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
-      },
-      data: {
-        messaging_product: "whatsapp",
-        to: message.from,
-        text: { body: "Echo: " + message.text.body },
-        context: {
-          message_id: message.id,
-        },
+        'Content-Type': 'application/json',
       },
     });
-    
-    // Mark the incoming message as read
-    await axios({
-      method: "POST",
-      url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
-      headers: {
-        Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
-      },
-      data: {
-        messaging_product: "whatsapp",
-        status: "read",
-        message_id: message.id,
-      },
-    });
-
+    console.log('Message Sent');
     res.sendStatus(200);
   } catch (error) {
-    console.error("Error sending message:", error);
-    res.sendStatus(500);
+    console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
+    res.sendStatus(400);
   }
+
+  // try {
+    
+    // await axios({
+    //   method: "POST",
+    //   url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
+    //   headers: {
+    //     Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
+    //   },
+    //   data: {
+    //     messaging_product: "whatsapp",
+    //     to: message.from,
+    //     text: { body: "Echo: " + message.text.body },
+    //     context: {
+    //       message_id: message.id,
+    //     },
+    //   },
+    // });
+    
+    // Mark the incoming message as read
+    // await axios({
+    //   method: "POST",
+    //   url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
+    //   headers: {
+    //     Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
+    //   },
+    //   data: {
+    //     messaging_product: "whatsapp",
+    //     status: "read",
+    //     message_id: message.id,
+    //   },
+    // });
+
+  //   res.sendStatus(200);
+  // } catch (error) {
+  //   console.error("Error sending message:", error);
+  //   res.sendStatus(500);
+  // }
 });
 
 app.listen(PORT, () => {
