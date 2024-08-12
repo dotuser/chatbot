@@ -23,7 +23,9 @@ app.get('/webhook', (req, res) => {
 });
 
 app.post('/webhook', (req, res) => {
-  console.log(req.body.entry);
+  console.log(req.body.entry.length);
+  console.log(req.body.entry.messaging.length);
+  console.log(req.body.entry.messaging.length);
   
   // const entry = req.body.entry[0];
   // const messaging = entry.messaging[0];
