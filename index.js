@@ -23,56 +23,99 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-app.post("/webhook", async (req, res) => {
-  console.log(req.body);
-  res.status(200).send('Ok');
-  // log incoming messages
-  // console.log("Incoming webhook message:", JSON.stringify(req.body, null, 2));
+app.post("/webhook", (req, res) => {
+  const payload = req.body
+  const entry = payload.entry;
+  const type = payload.object;
 
-  // check if the webhook request contains a message
-  // details on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
-  // const message = req.body.entry?.[0]?.changes[0]?.value?.messages?.[0];
+  if (!entry) 
+    res.sendStatus(400);
 
-  // // check if the incoming message contains text
-  // if (message?.type === "text") {
-  //   // extract the business number to send the reply from it
-  //   const business_phone_number_id =
-  //     req.body.entry?.[0].changes?.[0].value?.metadata?.phone_number_id;
-
-  //   // send a reply message as per the docs here https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages
-  //   await axios({
-  //     method: "POST",
-  //     url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
-  //     headers: {
-  //       Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
-  //     },
-  //     data: {
-  //       messaging_product: "whatsapp",
-  //       to: message.from,
-  //       text: { body: "Echo: " + message.text.body },
-  //       context: {
-  //         message_id: message.id, // shows the message as a reply to the original user message
-  //       },
-  //     },
-  //   });
-
-  //   // mark incoming message as read
-  //   // await axios({
-  //   //   method: "POST",
-  //   //   url: `https://graph.facebook.com/v18.0/${business_phone_number_id}/messages`,
-  //   //   headers: {
-  //   //     Authorization: `Bearer ${GRAPH_API_TOKEN}`,
-  //   //   },
-  //   //   data: {
-  //   //     messaging_product: "whatsapp",
-  //   //     status: "read",
-  //   //     message_id: message.id,
-  //   //   },
-  //   // });
-  // }
-
-  // res.sendStatus(200);
+  if (type === 'page') 
+    msgToPage(payload, res);
+  else if (type === 'whatsapp_business_account')
+    msgToWapp(payload, res);
+  else res.sendStatus(400);
 });
+
+const msgToPage = async (payload, res) => {
+  const promises = payload.entry.map(async (entry) => {
+    const event = entry.messaging[0];
+
+    if (event.message && event.message.text)
+      res.sendStatus(400);
+
+    const psid = event.sender.id;
+    const pgid = event.recipient.id;
+    const msg = event.message.text;
+    const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${pgid}/messages?access_token=${PAGE_ACCESS_TOKEN}`;
+    const payload = {
+      recipient: {
+        id: psid,
+      },
+      messaging_type: 'RESPONSE',
+      message: {
+        text: `Server received your message: ${msg}`,
+      },
+    };
+    
+    try {
+      const response = await axios.post(url, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log(`Success: ${response.data}`);
+    } catch (error) {
+      console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
+    }
+  });
+
+  await Promise.all(promises);
+  res.sendStatus(200);
+};
+
+const msgToWapp = async (payload, res) => {
+  const message = payload.entry?.[0]?.changes[0]?.value?.messages?.[0];
+
+  if (!message?.type === "text")
+    res.sendStatus(400);
+  
+  const business_phone_number_id = 
+    payload.entry?.[0].changes?.[0].value?.metadata?.phone_number_id;
+  
+  await axios({
+    method: "POST",
+    url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
+    headers: {
+      Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
+    },
+    data: {
+      messaging_product: "whatsapp",
+      to: message.from,
+      text: { body: "Echo: " + message.text.body },
+      context: {
+        message_id: message.id,
+      },
+    },
+  });
+  
+  // mark incoming message as read
+  await axios({
+    method: "POST",
+    url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
+    headers: {
+      Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
+    },
+    data: {
+      messaging_product: "whatsapp",
+      status: "read",
+      message_id: message.id,
+    },
+  });
+
+  res.sendStatus(200);
+};
 
 // app.post('/webhook', async (req, res) => {
 //   const payload = req.body;
