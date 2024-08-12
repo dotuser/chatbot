@@ -22,24 +22,34 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-app.post('/webhook', (req, res) => {
+app.post('/webhook', async (req, res) => {
   const messaging = req.body.entry[0].messaging[0];
 
   const senderId = messaging.sender.id;
   const pageId = messaging.recipient.id;
-  const messageText = messaging.message.text;
+  const message = messaging.message.text;
   
-  console.log(senderId);
-  console.log(pageId);
-  console.log(messageText);
+  const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${pageId}/messages?access_token=${PAGE_ACCESS_TOKEN}`;
+  const payload = {
+    recipient: {
+      id: senderId,
+    },
+    messaging_type: 'RESPONSE',
+    message: {
+      text: `Echo: ${message}`,
+    },
+  };
   
-
-  // // Check if the message is from the page
-  // // if (messaging.recipient.id === 'YOUR_PAGE_ID')
-  //   // Send reply
-  
-  // const reply = `Hello! You said: ${messageText}`;
-  // sendReply(senderId, pageId, reply);
+  try {
+    await axios.post(url, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log('Message Sent..');
+  } catch (error) {
+    console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
+  }
 
   res.status(200).send('OK');
 });
