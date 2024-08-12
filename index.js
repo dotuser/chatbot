@@ -23,25 +23,9 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-app.post("/webhook", (req, res) => {
+app.post("/webhook", async (req, res) => {
   const payload = req.body
-  const entry = payload.entry;
-  const type = payload.object;
 
-  if (!entry) {
-    res.sendStatus(400);
-  };
-
-  if (type === 'page') {
-    msgToPage(payload, res);
-  } else if (type === 'whatsapp_business_account') {
-    msgToWapp(payload, res);
-  } else {
-    res.sendStatus(400);
-  } 
-});
-
-const msgToPage = async (payload, res) => {
   const promises = payload.entry.map(async (entry) => {
     const event = entry.messaging[0];
 
@@ -77,9 +61,26 @@ const msgToPage = async (payload, res) => {
 
   await Promise.all(promises);
   res.sendStatus(200);
-};
+});
 
-const msgToWapp = async (payload, res) => {
+
+
+app.get('/wapp', (req, res) => {
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+  console.log(req.query);
+  
+
+  if (mode === "subscribe" && token === WEBHOOK_VERIFY_TOKEN) {
+    return res.status(200).send(challenge);
+  } else {
+    return res.status(403).send('Forbidden');
+  }
+});
+
+app.post("/wapp", async (req, res) => {
+  const payload = req.body
   const message = payload.entry?.[0]?.changes[0]?.value?.messages?.[0];
 
   if (!message?.type === "text") {
@@ -120,7 +121,7 @@ const msgToWapp = async (payload, res) => {
   });
 
   res.sendStatus(200);
-};
+});
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
