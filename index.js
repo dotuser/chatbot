@@ -23,40 +23,42 @@ app.get('/webhook', (req, res) => {
 });
 
 app.post('/webhook', (req, res) => {
-  const entry = req.body.entry[0];
-  const messaging = entry.messaging[0];
-  const senderId = messaging.sender.id;
-  const pageId = messaging.recipient.id;
-  const messageText = messaging.message.text;
-
-  // Check if the message is from the page
-  // if (messaging.recipient.id === 'YOUR_PAGE_ID')
-    // Send reply
+  console.log(req.body.entry);
   
-  const reply = `Hello! You said: ${messageText}`;
-  sendReply(senderId, pageId, reply);
+  // const entry = req.body.entry[0];
+  // const messaging = entry.messaging[0];
+  // const senderId = messaging.sender.id;
+  // const pageId = messaging.recipient.id;
+  // const messageText = messaging.message.text;
+
+  // // Check if the message is from the page
+  // // if (messaging.recipient.id === 'YOUR_PAGE_ID')
+  //   // Send reply
+  
+  // const reply = `Hello! You said: ${messageText}`;
+  // sendReply(senderId, pageId, reply);
 
   res.status(200).send('OK');
 });
 
-const sendReply = (senderId, pageId, reply) => {
-  const messageData = {
-    recipient: {
-      id: senderId
-    },
-    message: {
-      text: reply
-    }
-  };
+// const sendReply = (senderId, pageId, reply) => {
+//   const messageData = {
+//     recipient: {
+//       id: senderId
+//     },
+//     message: {
+//       text: reply
+//     }
+//   };
 
-  axios.post(`https://graph.facebook.com/${GRAPH_API_VERSION}/${pageId}/messages?access_token=${PAGE_ACCESS_TOKEN}`, messageData)
-    .then((response) => {
-      console.log('Message sent successfully');
-    })
-    .catch((error) => {
-      console.error('Failed to send message:', error);
-    });
-}
+//   axios.post(`https://graph.facebook.com/${GRAPH_API_VERSION}/${pageId}/messages?access_token=${PAGE_ACCESS_TOKEN}`, messageData)
+//     .then((response) => {
+//       console.log('Message sent successfully');
+//     })
+//     .catch((error) => {
+//       console.error('Failed to send message:', error);
+//     });
+// }
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
