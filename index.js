@@ -67,7 +67,7 @@ app.get('/wapp-webhook', (req, res) => {
   }
 });
 
-app.post("/wapp", async (req, res) => {
+app.post("/wapp-webhook", async (req, res) => {
   console.log(req.body);
   const message = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   console.log(message);
