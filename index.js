@@ -78,13 +78,10 @@ app.post("/wapp-webhook", async (req, res) => {
 
   const business_phone_number_id = 
     payload.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
-
-  if (business_phone_number_id == WAPP_PHONE_NUMBER_ID) {
-    console.log('ID Matched...');
     
-  }
-  console.log(message.from);
-
+  console.log('Incoming : ', business_phone_number_id);
+  console.log('Env : ', WAPP_PHONE_NUMBER_ID);
+  
   // try {
   //   // Send a message
   //   await axios({
