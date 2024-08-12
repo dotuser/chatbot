@@ -4,7 +4,8 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-const PORT = process.env.PORT;
+
+const { WEBHOOK_VERIFY_TOKEN, WAPP_ACCESS_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN, PORT } = process.env;
 
 app.get('/', (req, res) => res.send('Welcome to Chika Chino'));
 
@@ -12,169 +13,110 @@ app.get('/webhook', (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
+  console.log(req.query);
+  
 
-  if (mode === "subscribe" && token === process.env.WEBHOOK_VERIFY_TOKEN) {
+  if (mode === "subscribe" && token === WEBHOOK_VERIFY_TOKEN) {
     return res.status(200).send(challenge);
   } else {
     return res.status(403).send('Forbidden');
   }
 });
 
+app.post("/webhook", async (req, res) => {
+  // log incoming messages
+  // console.log("Incoming webhook message:", JSON.stringify(req.body, null, 2));
 
-app.post('/webhook', async (req, res) => {
-  const payload = req.body;
+  // check if the webhook request contains a message
+  // details on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
+  const message = req.body.entry?.[0]?.changes[0]?.value?.messages?.[0];
 
-  if (payload.object === 'page' && payload.entry) {
-    const promises = payload.entry.map(async (entry) => {
-      const event = entry.messaging[0];
+  // check if the incoming message contains text
+  if (message?.type === "text") {
+    // extract the business number to send the reply from it
+    const business_phone_number_id =
+      req.body.entry?.[0].changes?.[0].value?.metadata?.phone_number_id;
 
-      if (event.message && event.message.text) {
-        const psid = event.sender.id;
-        const pgid = event.recipient.id;
-        const msg = event.message.text;
-
-        const url = `https://graph.facebook.com/v20.0/${pgid}/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
-
-        const payload = {
-          recipient: {
-            id: psid,
-          },
-          messaging_type: 'RESPONSE',
-          message: {
-            text: `Server received your message: ${msg}`,
-          },
-        };
-
-        try {
-          const response = await axios.post(url, payload, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          console.log(`Success: ${response.data}`);
-        } catch (error) {
-          console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
-        }
-      }
+    // send a reply message as per the docs here https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages
+    await axios({
+      method: "POST",
+      url: `https://graph.facebook.com/${GRAPH_API_VERSION}/${business_phone_number_id}/messages`,
+      headers: {
+        Authorization: `Bearer ${WAPP_ACCESS_TOKEN}`,
+      },
+      data: {
+        messaging_product: "whatsapp",
+        to: message.from,
+        text: { body: "Echo: " + message.text.body },
+        context: {
+          message_id: message.id, // shows the message as a reply to the original user message
+        },
+      },
     });
 
-    await Promise.all(promises);
-    res.status(200).send('OK');
-  } else {
-    res.status(400).send('Bad Request');
+    // mark incoming message as read
+    // await axios({
+    //   method: "POST",
+    //   url: `https://graph.facebook.com/v18.0/${business_phone_number_id}/messages`,
+    //   headers: {
+    //     Authorization: `Bearer ${GRAPH_API_TOKEN}`,
+    //   },
+    //   data: {
+    //     messaging_product: "whatsapp",
+    //     status: "read",
+    //     message_id: message.id,
+    //   },
+    // });
   }
+
+  res.sendStatus(200);
 });
 
 // app.post('/webhook', async (req, res) => {
 //   const payload = req.body;
-//   let psid = null;
-//   let pgid = null;
-//   let msg = null;
+//   console.log(payload);
+
 
 //   if (payload.object === 'page' && payload.entry) {
-//     payload.entry.forEach(entry => {
+//     const promises = payload.entry.map(async (entry) => {
 //       const event = entry.messaging[0];
-      
-//       psid = event.sender.id;
-//       pgid = event.recipient.id;
-//       msg = event.message.text;
+
+//       if (event.message && event.message.text) {
+//         const psid = event.sender.id;
+//         const pgid = event.recipient.id;
+//         const msg = event.message.text;
+
+//         const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${pgid}/messages?access_token=${PAGE_ACCESS_TOKEN}`;
+
+//         const payload = {
+//           recipient: {
+//             id: psid,
+//           },
+//           messaging_type: 'RESPONSE',
+//           message: {
+//             text: `Server received your message: ${msg}`,
+//           },
+//         };
+
+//         try {
+//           const response = await axios.post(url, payload, {
+//             headers: {
+//               'Content-Type': 'application/json',
+//             },
+//           });
+//           console.log(`Success: ${response.data}`);
+//         } catch (error) {
+//           console.error(`Error sending message: ${error.response ? error.response.data : error.message}`);
+//         }
+//       }
 //     });
 
-//     //  FACEBOOK PAGE
-//     if (psid && pgid && msg) {
-//       const url = `https://graph.facebook.com/v20.0/${pgid}/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
-          
-//       const payload = {
-//         recipient: {
-//           id: psid,
-//         },
-//         messaging_type: 'RESPONSE',
-//         message: {
-//           text: `Server received your message: ${msg}`,
-//         },
-//       };
-      
-//       try {
-//         await axios.post(url, payload)
-//         .then(res => {
-//           console.log(`Success: ${res.data}`);
-//           res.status(200).send('OK');
-//         }).catch(e => {
-//           console.log(`Success: ${res.data}`);
-//           res.status(400);
-//         })
-//       } catch (error) {
-//         console.log(error);
-//       }
-//     }
+//     await Promise.all(promises);
+//     res.status(200).send('OK');
+//   } else {
+//     res.status(400).send('Bad Request');
 //   }
 // });
-
-// const callSendAPI = async (pgid, psid, msg) => {
-//   const url = `https://graph.facebook.com/v20.0/${pgid}/messages?access_token=${process.env.PAGE_ACCESS_TOKEN}`;
-
-//   const payload = {
-//     recipient: {
-//       id: psid,
-//     },
-//     messaging_type: 'RESPONSE',
-//     message: {
-//       text: `Server received your message: ${msg}`,
-//     },
-//   };
-
-//   try {
-//     await axios.post(url, payload);
-//     console.log('Message Sent');
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
-// await axios.post(url, payload, {
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-// })
-//   .then(response => {
-//     console.log('Message sent:', response.data);
-//   })
-//   .catch(error => {
-//     console.error('Error sending message:', error.response ? error.response.data : error.message);
-//   });
-
-// const request_body = {
-//   "recipient": {
-//     "id": sender_psid
-//   },
-//   "message": response
-// };
-
-// try {
-//   await axios.post('https://graph.facebook.com/v2.6/me/messages', request_body, {
-//     params: { "access_token": process.env.INSTA_PAGE_ACCESS_TOKEN }
-//   });
-//   console.log('Message Sent!');
-// } catch (err) {
-//   console.error("Unable to send message:" + err);
-// }
-
-// function sendMessage(recipientId, messageText) {
-//   axios.post(`https://graph.facebook.com/v15.0/${recipientId}/messages`, {
-//       messaging_type: 'RESPONSE',
-//       recipient: { id: recipientId },
-//       message: { text: messageText },
-//   }, {
-//       params: { access_token: process.env.ACCESS_TOKEN },
-//   })
-//   .then(response => {
-//       console.log('Message sent:', response.data);
-//   })
-//   .catch(error => {
-//       console.error('Error sending message:', error);
-//   });
-// }
-
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
