@@ -11,11 +11,11 @@ const { PORT, VERIFY_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN, WAPP_ACCESS_TO
 
 app.get('/', (req, res) => res.send('Welcome to Chika Chino'));
 
-app.post('/ask', async (req, res) => {
-  const { question } = req.body;
-  const answer = await askGroq(question);
-  res.status(200).send(answer);
-});
+// app.post('/ask', async (req, res) => {
+//   const { question } = req.body;
+//   const answer = await askGroq(question);
+//   res.status(200).send(answer);
+// });
 
 app.get('/webhook', (req, res) => {
   const { "hub.mode": mode, "hub.verify_token": token, "hub.challenge": challenge } = req.query;
