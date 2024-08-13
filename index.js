@@ -11,12 +11,6 @@ const { PORT, VERIFY_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN, WAPP_ACCESS_TO
 
 app.get('/', (req, res) => res.send('Welcome to Chika Chino'));
 
-// app.post('/ask', async (req, res) => {
-//   const { question } = req.body;
-//   const answer = await askGroq(question);
-//   res.status(200).send(answer);
-// });
-
 app.get('/webhook', (req, res) => {
   const { "hub.mode": mode, "hub.verify_token": token, "hub.challenge": challenge } = req.query;
 
@@ -31,15 +25,17 @@ app.post('/webhook', async (req, res) => {
   const messaging = req.body.entry?.[0]?.messaging?.[0];
   
   if (messaging && messaging.sender && messaging.message) {
+    const question = messaging.message.text;
+    const answer = await askGroq(question);
+
     const senderId = messaging.sender.id;
     const pageId = messaging.recipient.id;
-    const message = messaging.message.text;
 
     const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${pageId}/messages?access_token=${PAGE_ACCESS_TOKEN}`;
     const payload = {
       recipient: { id: senderId },
       messaging_type: 'RESPONSE',
-      message: { text: `Echo: ${message}` },
+      message: { text: answer },
     };
     
     try {
