@@ -1,13 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import Groq from 'groq-sdk';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const fs = require('fs');
+const path = require('path');
+const Groq = require('groq-sdk');
+require('dotenv').config();
 
 const contextFilePath = path.join(__dirname, './context/ChikaChino.txt');
 const context = fs.readFileSync(contextFilePath, 'utf-8');
@@ -16,7 +10,7 @@ const groq = new Groq({
   apiKey: process.env.GROQ_ACCESS_TOKEN,
 });
 
-const getAnswerFromGroq = async (question) => {
+async function getAnswerFromGroq(question, context) {
   try {
     const params = {
       messages: [
@@ -32,8 +26,14 @@ const getAnswerFromGroq = async (question) => {
     return answer;
   } catch (error) {
     console.error('Error getting answer from Groq:', error);
-    return 'Sorry, I could not process your request at the moment.';
+    return `Sorry, I could not process your request at the moment. 
+    Please call or message restaurant directly at 0300 9542683 for further information.`;
   }
 }
 
-export default getAnswerFromGroq;
+const askGroq = async (question) => {
+  const answer = await getAnswerFromGroq(question, context);
+  return answer;
+}
+
+module.exports = askGroq;
