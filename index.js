@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
-const { default: getAnswerFromGroq } = require('./src/AIBot');
+const askGroq = require('./src/AIBot');
+
 require('dotenv').config();
 
 const app = express();
@@ -9,6 +10,12 @@ app.use(express.json());
 const { PORT, VERIFY_TOKEN, GRAPH_API_VERSION, PAGE_ACCESS_TOKEN, WAPP_ACCESS_TOKEN, WAPP_PHONE_NUMBER_ID } = process.env;
 
 app.get('/', (req, res) => res.send('Welcome to Chika Chino'));
+
+app.post('/ask', async (req, res) => {
+  const { question } = req.body;
+  const answer = await askGroq(question);
+  res.status(200).send(answer);
+});
 
 app.get('/webhook', (req, res) => {
   const { "hub.mode": mode, "hub.verify_token": token, "hub.challenge": challenge } = req.query;
@@ -63,7 +70,7 @@ app.post("/wapp-webhook", async (req, res) => {
   const question = message.text?.body;
 
   if (message && message.from && question) {
-    const answer = await getAnswerFromGroq(question);
+    const answer = await askGroq(question);
 
     const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${WAPP_PHONE_NUMBER_ID}/messages?access_token=${WAPP_ACCESS_TOKEN}`;
     const payload = {
