@@ -130,6 +130,17 @@ app.post("/askChikaChino", async (req, res) => {
   res.status(200).send(answer);
 });
 
+app.post("/retailBot", async (req, res) => {
+  const { question } = req.body;
+  const type = 0;
+  if (!question) {
+    return res.sendStatus(400);
+  }
+
+  const answer = await askGroq(question, type);
+  res.status(200).send(answer);
+});
+
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
 });
