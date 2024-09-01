@@ -121,17 +121,12 @@ app.post("/wapp-webhook", async (req, res) => {
 
 app.post("/askChikaChino", async (req, res) => {
   const { question } = req.body;
-  console.log(question);
-
+  
   if (!question) {
     return res.sendStatus(400);
   }
 
   const answer = await askGroq(question);
-
-  console.log(typeof answer);
-  console.log(answer);
-
   res.status(200).send(answer);
 });
 
