@@ -6,6 +6,9 @@ require('dotenv').config();
 const contextFilePath = path.join(__dirname, './context/ChikaChino.txt');
 const context = fs.readFileSync(contextFilePath, 'utf-8');
 
+const contextFilePathRetail = path.join(__dirname, './context/TechZone.txt');
+const contextRetail = fs.readFileSync(contextFilePathRetail, 'utf-8');
+
 const groq = new Groq({
   apiKey: process.env.GROQ_ACCESS_TOKEN,
 });
@@ -31,8 +34,8 @@ async function getAnswerFromGroq(question, context) {
   }
 }
 
-const askGroq = async (question) => {
-  const answer = await getAnswerFromGroq(question, context);
+const askGroq = async (question, type = 1) => {
+  const answer = await getAnswerFromGroq(question, type ? context : contextRetail);
   return answer;
 }
 
