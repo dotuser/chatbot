@@ -1,11 +1,17 @@
 const express = require("express");
 const axios = require("axios");
 const askGroq = require("./src/AIBot");
-
+const cors = require('cors');
 require("dotenv").config();
+
 
 const app = express();
 app.use(express.json());
+app.use(cors({
+  origin: '*', //  'http://localhost:5173', // Replace with your React frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 const {
   PORT,
