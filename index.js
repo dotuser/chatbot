@@ -138,10 +138,11 @@ app.post("/askChikaChino", async (req, res) => {
 
 app.post("/retailBot", async (req, res) => {
   const { question } = req.body;
-  const type = 0;
-  if (!question) {
-    return res.sendStatus(400);
-  }
+  console.log(question);
+  
+  const type = 1;
+
+  if (!question) return res.sendStatus(400);
 
   const answer = await askGroq(question, type);
   res.status(200).send(answer);
