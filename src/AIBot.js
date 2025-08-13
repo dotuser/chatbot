@@ -23,7 +23,7 @@ async function getAnswerFromGroq(question, context) {
         },
         {
           role: "system",
-          content: `If you dont find the answer in the provided context, please provide the phone number from the context file to call or message directly. If user wants to order something then they can call at the provided number.`,
+          content: `Answer the question from the context file.`,
         },
         { role: "user", content: question },
       ],
